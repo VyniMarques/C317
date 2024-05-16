@@ -1,65 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <style>
         body {
-            margin: 0;
+            margin: 5vh;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f0f0f0; /* Adicionei uma cor de fundo para diferenciar */
+            background-color: #f0f0f0;
+            /* Adicionei uma cor de fundo para diferenciar */
+            font-family: Verdana;
         }
-        
-        .login_box{
-            height: 80vh; /* Reduzi um pouco a altura */
-            width: 40vw;
+
+        .login_box {
+            height: 70vh;
+            /* Reduzi um pouco a altura */
+            width: 30vw;
             background-color: #07386d;
-            border-radius: 20px; /* Adicionei bordas arredondadas */
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); /* Adicionei uma sombra para destacar */
+            border-radius: 20px;
+            /* Adicionei bordas arredondadas */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            /* Adicionei uma sombra para destacar */
             display: flex;
-            flex-direction: column; /* Alterado para uma coluna para empilhar os elementos */
+            flex-direction: column;
+            /* Alterado para uma coluna para empilhar os elementos */
             justify-content: center;
-            align-items: center; /* Adicionei para centralizar o conteúdo */
+            align-items: center;
+            /* Adicionei para centralizar o conteúdo */
         }
-        .inputs{
+
+        .inputs {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            margin-top: -20px; /* Movendo um pouco para cima */
+            margin-top: -20px;
+            /* Movendo um pouco para cima */
         }
-        .inputs input{
+
+        .inputs input {
             background-color: #98a3af;
             border: none;
             border-radius: 5px;
             padding: 8px;
-            margin-bottom: 5px; /* Adicionando um espaço entre os campos */
-            width: 80%; /* Ajustando a largura dos campos */
+            margin-bottom: 5px;
+            /* Adicionando um espaço entre os campos */
+            width: 80%;
+            /* Ajustando a largura dos campos */
         }
-        .inputs p{
+
+        .inputs p {
             color: white;
-            font-size: 16px; /* Reduzindo o tamanho da fonte */
-            margin: 5px 0; /* Adicionando um espaço entre o parágrafo e o campo */
-            text-align: center; /* Centralizando o texto */
+            font-size: 16px;
+            /* Reduzindo o tamanho da fonte */
+            margin: 5px 0;
+            /* Adicionando um espaço entre o parágrafo e o campo */
+            text-align: center;
+            /* Centralizando o texto */
+            font-size: 7vh;
+
         }
-        .inputs input, .inputs button {
-            margin-bottom: 10px; /* Ajustando o espaço entre os campos */
-        }
+
+        .inputs input,
         .inputs button {
-            background-color: #a3ada3; /* Alterando a cor de fundo do botão */
+            margin-bottom: 10px;
+            /* Ajustando o espaço entre os campos */
+            width: 40vh;
+            height: 5vh;
+            font-family: Verdana;
+        }
+
+        .inputs button {
+            background-color: #11a2a7;
+            /* Alterando a cor de fundo do botão */
             color: white;
             border: none;
             border-radius: 5px;
             padding: 10px 20px;
             cursor: pointer;
         }
+
+        .headerpage {
+            position: absolute;
+            height: 16vh;
+            background: rgb(11, 77, 155);
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            display: flex;
+            flex-direction: row;
+            justify-content: start;
+        }
     </style>
 </head>
+
 <body>
+
+    <div class="headerpage">
+        <div class="icon"></div>
+        <img src="{%static 'images/iwsimage.png' %}" alt="Nada" height="50">
+    </div>
     <div class="login_box">
         <div class="inputs">
             <p>Login</p>
@@ -69,4 +114,5 @@
         </div>
     </div>
 </body>
+
 </html>
