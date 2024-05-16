@@ -9,8 +9,14 @@ def conversar(request):
     return render(request, 'chat.html')
 
 
+def login(request):
+    return render(request, 'login.html')
+
+def cadastro(request):
+    return render(request, 'cadastro.html')
+
 def iaProcess(mensage):
-    APIKEY = 'yout apy key'
+    APIKEY = 'API key'
 
     genai.configure(api_key=APIKEY)
 
