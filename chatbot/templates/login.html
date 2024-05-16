@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0; /* Adicionei uma cor de fundo para diferenciar */
+        }
+        
+        .login_box{
+            height: 80vh; /* Reduzi um pouco a altura */
+            width: 40vw;
+            background-color: #07386d;
+            border-radius: 20px; /* Adicionei bordas arredondadas */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); /* Adicionei uma sombra para destacar */
+            display: flex;
+            flex-direction: column; /* Alterado para uma coluna para empilhar os elementos */
+            justify-content: center;
+            align-items: center; /* Adicionei para centralizar o conteúdo */
+        }
+        .inputs{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-top: -20px; /* Movendo um pouco para cima */
+        }
+        .inputs input{
+            background-color: #98a3af;
+            border: none;
+            border-radius: 5px;
+            padding: 8px;
+            margin-bottom: 5px; /* Adicionando um espaço entre os campos */
+            width: 80%; /* Ajustando a largura dos campos */
+        }
+        .inputs p{
+            color: white;
+            font-size: 16px; /* Reduzindo o tamanho da fonte */
+            margin: 5px 0; /* Adicionando um espaço entre o parágrafo e o campo */
+            text-align: center; /* Centralizando o texto */
+        }
+        .inputs input, .inputs button {
+            margin-bottom: 10px; /* Ajustando o espaço entre os campos */
+        }
+        .inputs button {
+            background-color: #a3ada3; /* Alterando a cor de fundo do botão */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="login_box">
+        <div class="inputs">
+            <p>Login</p>
+            <input type="text" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Senha">
+            <button>Login</button>
+        </div>
+    </div>
+</body>
+</html>
