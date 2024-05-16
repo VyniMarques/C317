@@ -1,0 +1,143 @@
+/* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.botmensage {
+    display: flex;
+    margin-left: 10%;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    color: #333;
+    padding: 10px;
+    justify-content: right;
+}
+
+.bot-talk {
+    color: #666;
+    margin-left: 10px;
+}
+
+.bot-icon {
+    position: relative;
+    border-radius: 50%;
+    background: rgb(237, 237, 237);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+    justify-content: flex-end;
+}
+
+.bot-icon img {
+    height: 100%;
+}
+
+.chat-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.chat-messages {
+    padding: 10px;
+    overflow-y: scroll;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0%;
+    align-self: stretch;
+    min-height: 0px;
+}
+
+.message {
+    margin-bottom: 10px;
+}
+
+.message .user {
+    font-weight: bold;
+    color: #333;
+}
+
+.message .text {
+    color: #666;
+}
+
+.chat-input {
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.chat-input form {
+    display: flex;
+}
+
+.chat-input input[type="text"] {
+    flex: 1;
+    width: calc(100% - 20px);
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    outline: none;
+}
+
+.chat-input button[type="submit"] {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.headerpage {
+    position: absolute;
+    height: 16vh;
+    background: rgb(11, 77, 155);
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+}
+
+.allchat {
+    flex: 1 1 0%;
+    overflow: hidden;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    width: 80vw;
+    height: 60vh;
+    max-width: 1134px;
+    background: rgb(255, 255, 255);
+    box-shadow: rgba(0, 0, 0, 0.25) 4px 4px 4px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0%;
+    align-self: stretch;
+    min-height: 0px;
+}
+
+.headerpage img {
+    height: 100%;
+}

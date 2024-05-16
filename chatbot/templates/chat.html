@@ -1,0 +1,105 @@
+{% load static %}
+{% csrf_token %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <div class="chat-container">
+        <div class="headerpage">
+            <div class="icon"></div>
+            <img src="{%static 'images/iwsimage.png' %}" alt="Nada" height="50">
+        </div>
+        <div class="allchat">
+            <div class="chat-messages" id="chat-messages">
+            </div>
+            <div class="chat-input">
+                <form id="chat-form">
+                    <input type="text" id="message" placeholder="Digite sua mensagem...">
+                    <button type="submit" value="Enviar" style="background-color: #007bff"><img
+                            src="{%static 'images/enviar.png' %}" alt="" height="20"></button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Verifica se o cookie possui o prefixo correto
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Função para calcular e ajustar a posição do chatbox em relação ao headerpage
+        function adjustChatboxPosition() {
+            const headerpageHeight = document.querySelector('.headerpage').offsetHeight;
+            const allchat = document.querySelector('.allchat');
+            allchat.style.top = headerpageHeight + 40 + 'px';
+        }
+
+        // Chama a função ao carregar a página e redimensionar a janela
+        window.addEventListener('DOMContentLoaded', adjustChatboxPosition);
+        window.addEventListener('resize', adjustChatboxPosition);
+
+        const form = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message');
+        const chatMessages = document.getElementById('chat-messages');
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // Evita o recarregamento da página
+
+            const messageText = messageInput.value;
+            if (messageText.trim() !== '') {
+                appendMessage('Você', messageText); // Adiciona a mensagem enviada pelo usuário
+                $.get('/chatbot/process-message', { usermessage: messageText }).done(function (data) {
+                    $('#chat-messages').append(
+                        `<div class="botmensage">
+                        <span>BOT:</span>
+                        <span class="bot-talk">${data}</span>
+                        <div class="bot-icon">
+                            <img src="/static/images/bot.png" alt="">
+                        </div>
+                        </div>`
+                    );
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                });
+
+                // Manter a rolagem automática para exibir a última mensagem
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                messageInput.value = ''; // Limpa o campo de entrada após o envio da mensagem
+            }
+        });
+
+        function appendMessage(user, text) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.innerHTML = `<span class="user">${user}:</span> <span class="text">${text}</span>`;
+            chatMessages.appendChild(messageElement);
+            // Manter a rolagem automática para exibir a última mensagem
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+
+</body>
+
+</html>
