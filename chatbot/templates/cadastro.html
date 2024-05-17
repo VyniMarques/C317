@@ -104,14 +104,15 @@
     </header>
 
     <div class="login_box">
-        <div class="login">
+        <form action="{% url 'cadastro'%}" class="login" method="post">
+            {% csrf_token %}
             <p>Criar Cadastro</p>
-            <input type="text" id="name" placeholder="Nome">
-            <input type="text" id="email" placeholder="Email">
-            <input type="text" id="area" placeholder="Area">
-            <input type="password" id="password" placeholder="Senha">
+            <input type="text" name="name" placeholder="Nome">
+            <input type="text" name="email" placeholder="Email">
+            <input type="text" name="area" placeholder="Area">
+            <input type="password" name="password" placeholder="Senha">
             <button>Cadastrar</button>
-        </div>
+        </form>
     </div>
 </body>
 </html>

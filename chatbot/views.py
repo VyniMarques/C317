@@ -4,6 +4,7 @@ import requests
 import google.generativeai as genai
 import json
 import re
+from .models import Usuario
 
 def conversar(request):
     return render(request, 'chat.html')
@@ -13,7 +14,28 @@ def login(request):
     return render(request, 'login.html')
 
 def cadastro(request):
-    return render(request, 'cadastro.html')
+    print(request.POST.get('email') == '')
+    if request.POST.get('name') == None and request.POST.get('email') == None and request.POST.get('area') == None and request.POST.get('password') == None :
+        print('palmeiras')
+        return render(request, 'cadastro.html')
+    elif request.POST.get('name') == '' or request.POST.get('email') == '' or request.POST.get('area') == '' or request.POST.get('password') == '' :
+        print('flamengo')
+        return render(request, 'cadastro.html')
+    else:
+        if Usuario.objects.filter(email=request.POST.get('email')).exists():
+            print('corinthans')
+            return render(request, 'cadastro.html')
+        else:
+            print('cruzeiro')
+            usuario = Usuario()
+            usuario.nome = request.POST.get('name')
+            usuario.email = request.POST.get('email')
+            usuario.area = request.POST.get('area')
+            usuario.senha = request.POST.get('password')
+            #usuario.save()
+            render(request,'login.html')
+
+    
 
 def iaProcess(mensage):
     APIKEY = 'API key'
