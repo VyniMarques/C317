@@ -111,8 +111,11 @@
             <input type="text" name="email" placeholder="Email">
             <input type="text" name="area" placeholder="Area">
             <input type="password" name="password" placeholder="Senha">
-            <button>Cadastrar</button>
+            <button type="submit">Cadastrar</button>
         </form>
     </div>
+    {% if error_message %}
+        <script>alert("{{ error_message }}");</script>
+    {% endif %}
 </body>
 </html>

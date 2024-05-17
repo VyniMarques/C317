@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.http import JsonResponse, HttpResponse
 import requests
 import google.generativeai as genai
@@ -9,31 +10,49 @@ from .models import Usuario
 def conversar(request):
     return render(request, 'chat.html')
 
-
 def login(request):
-    return render(request, 'login.html')
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        if not (email and password):
+            # Se algum campo estiver vazio, renderize o template com um alerta
+            return render(request, 'login.html',{'error_message': 'Por favor, preencha todos os campos.'})
+        elif Usuario.objects.filter(email=email).exists():
+            usuario = Usuario.objects.get(email=email)
+            if usuario.senha == password:
+                return redirect(reverse('conversar'))
+            else:
+                return render(request, 'login.html', {'error_message': 'senha invalida'})
+        elif not Usuario.objects.filter(email=email).exists():
+            return render(request, 'login.html',{'error_message': 'esse email não esta cadastrado'})
+    else:
+        return render(request,'login.html')
 
 def cadastro(request):
-    print(request.POST.get('email') == '')
-    if request.POST.get('name') == None and request.POST.get('email') == None and request.POST.get('area') == None and request.POST.get('password') == None :
-        print('palmeiras')
-        return render(request, 'cadastro.html')
-    elif request.POST.get('name') == '' or request.POST.get('email') == '' or request.POST.get('area') == '' or request.POST.get('password') == '' :
-        print('flamengo')
-        return render(request, 'cadastro.html')
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        area = request.POST.get('area')
+        password = request.POST.get('password')
+
+        if not (name and email and area and password):
+            # Se algum campo estiver vazio, renderize o template com um alerta
+            return render(request, 'cadastro.html', {'error_message': 'Por favor, preencha todos os campos.'})
+
+        if Usuario.objects.filter(email=email).exists():
+            # Se o usuário já existir, renderize o template com um alerta
+            return render(request, 'cadastro.html', {'error_message': 'Este email já está em uso.'})
+
+        # Se tudo estiver correto, crie o usuário e redirecione para a página de login
+        usuario = Usuario()
+        usuario.nome = name
+        usuario.email = email
+        usuario.area = area
+        usuario.senha = password
+        usuario.save()
+        return redirect(reverse('login'))
     else:
-        if Usuario.objects.filter(email=request.POST.get('email')).exists():
-            print('corinthans')
-            return render(request, 'cadastro.html')
-        else:
-            print('cruzeiro')
-            usuario = Usuario()
-            usuario.nome = request.POST.get('name')
-            usuario.email = request.POST.get('email')
-            usuario.area = request.POST.get('area')
-            usuario.senha = request.POST.get('password')
-            #usuario.save()
-            render(request,'login.html')
+        return render(request, 'cadastro.html')
 
     
 

@@ -1,5 +1,4 @@
 {% load static %}
-{% csrf_token %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -45,7 +44,7 @@
             padding: 8px;
             margin-bottom: 5px;
             width: 80%;
-            height: 5vh;
+            height: 3vh;
         }
 
         .login p {
@@ -105,13 +104,17 @@
     </header>
 
     <div class="login_box">
-        <div class="login" method="post">
+        <form action="{%url 'login'%}" class="login" method="post">
+            {% csrf_token %}
             <p>Login</p>
-            <input type="text" id="email" placeholder="Email">
-            <input type="password" id="password" placeholder="Senha">
+            <input type="text" name="email" placeholder="Email">
+            <input type="password" name="password" placeholder="Senha">
             <button>Login</button>
             <a href="http://127.0.0.1:8000/chatbot/cadastro/">Cadastrar</a>
-        </div>
+        </form>
     </div>
+    {% if error_message %}
+    <script>alert("{{ error_message }}");</script>
+    {% endif %}
 </body>
 </html>
