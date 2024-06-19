@@ -1,14 +1,27 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_list_or_404
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse
 import requests
 import google.generativeai as genai
 import json
 import re
 from .models import Usuario
+from django.contrib.auth import authenticate, login as auth_login
+from django.http import JsonResponse
 
-def conversar(request):
-    return render(request, 'chat.html')
+
+from .models import Usuario  # Se estiver usando um modelo de usuário personalizado
+
+def perguntas_frequentes(request):
+    print('passei aqui')
+    if request.method == 'GET':
+        response_data = {}
+        response_data['result'] = 'perguntas'
+        response_data['message'] = 'Some error message'
+        #return JsonResponse({'perguntas': 'flavinho do pneu'})
+        return HttpResponse(json.dumps(response_data), content_type="application/json")
+
 
 def login(request):
     if request.method == 'POST':
@@ -16,17 +29,23 @@ def login(request):
         password = request.POST.get('password')
         if not (email and password):
             # Se algum campo estiver vazio, renderize o template com um alerta
-            return render(request, 'login.html',{'error_message': 'Por favor, preencha todos os campos.'})
+            return render(request, 'login.html', {'error_message': 'Por favor, preencha todos os campos.'})
         elif Usuario.objects.filter(email=email).exists():
-            usuario = Usuario.objects.get(email=email)
-            if usuario.senha == password:
+            userx = Usuario.objects.filter(email=email).first()
+            if userx.email == email and userx.password == password:
+                auth_login(request, userx)
                 return redirect(reverse('conversar'))
             else:
-                return render(request, 'login.html', {'error_message': 'senha invalida'})
-        elif not Usuario.objects.filter(email=email).exists():
-            return render(request, 'login.html',{'error_message': 'esse email não esta cadastrado'})
+                return render(request, 'login.html', {'error_message': 'Senha inválida'})
+        else:
+            return render(request, 'login.html', {'error_message': 'Esse email não está cadastrado'})
     else:
-        return render(request,'login.html')
+        return render(request, 'login.html')
+
+@login_required
+def conversar(request):
+    return render(request, 'chat.html')
+
 
 def cadastro(request):
     if request.method == 'POST':
@@ -34,7 +53,6 @@ def cadastro(request):
         email = request.POST.get('email')
         area = request.POST.get('area')
         password = request.POST.get('password')
-
         if not (name and email and area and password):
             # Se algum campo estiver vazio, renderize o template com um alerta
             return render(request, 'cadastro.html', {'error_message': 'Por favor, preencha todos os campos.'})
@@ -56,15 +74,23 @@ def cadastro(request):
 
     
 
-def iaProcess(mensage):
-    APIKEY = 'API key'
+def iaProcess(mensage, user_info):
+    APIKEY = "Your key"
 
     genai.configure(api_key=APIKEY)
 
     model = genai.GenerativeModel('gemini-pro')
     chatFoiCriado = False
     SairDoChat = ''
-    pergunta = mensage
+    pergunta = f'''
+                   A pergunta é :{mensage},
+                   Assuma que você é um chatbot da empresa IWS Intelliware Soluctions,
+                   Use como base para responder as peguntas as inormações presentes no site oficial da empresa,
+                   Responda as perguntas de forma amigavel,
+                   Você esta falando com {user_info["name"]},
+                   A area de atução do usuario no mercado é: {user_info["area"]},
+                   responda a perguta de forma sucinta,         
+                '''
     try:
         if not chatFoiCriado:
             chat = model.start_chat()
@@ -110,11 +136,25 @@ def iaProcess(mensage):
             saidaErro = 'Sua pergunta foi bloqueada por vilolar o(s) seguinte(s) termo(s): ' +'"'+ listaDeViolações + '"'
         return saidaErro
     
+@login_required
 def process_message(request):
-    message = request.GET.get('usermessage')   
-    # Envie a mensagem para o serviço de IA (por exemplo, Dialogflow)
-    response = iaProcess(message)
-    return HttpResponse(response)
+    if request.method == 'GET':
+        message = request.GET.get('usermessage')
+        user = request.user  # Isso assume que você está usando o sistema de autenticação do Django
+
+        # Exemplo de como enviar informações do usuário para iaProcess
+        user_info = {
+            'name': user.nome,
+            'email': user.email,
+            'area': user.area,
+        }
+        print(user_info)
+        # Envie a mensagem para a função iaProcess com as informações do usuário
+        response = iaProcess(message, user_info)
+
+        return HttpResponse(response)
+    else:
+        return HttpResponse('Método não permitido', status=405)
 
 
 def send_to_dialogflow(message):
@@ -131,5 +171,4 @@ def send_to_dialogflow(message):
     if response.status_code == 200:
         return response.json().get('queryResult').get('fulfillmentText')
     else:
-        print(response.status_code)
         return 'Desculpe, ocorreu um erro ao processar sua solicitação.'
