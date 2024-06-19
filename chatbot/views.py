@@ -6,20 +6,43 @@ import requests
 import google.generativeai as genai
 import json
 import re
-from .models import Usuario
+from .models import Usuario, TokenizedPhrase  # Adicione o modelo TokenizedPhrase
 from django.contrib.auth import authenticate, login as auth_login
 from django.http import JsonResponse
+from django.contrib.sessions.models import Session
+from django.utils import timezone
+
+import nltk
+from nltk.corpus import stopwords
 
 
-from .models import Usuario  # Se estiver usando um modelo de usuário personalizado
+mensageList = []
+nltk.download('stopwords')
+
+# Carrega o modelo de linguagem em português do spaCy
+import spacy
+nlp = spacy.load('pt_core_news_sm')
+
+# Lista de stop words em português
+stop_words = list(stopwords.words('portuguese'))
+
+def preprocess(text):
+    # Converte para minúsculas
+    text = text.lower()
+    # Remove pontuação e caracteres especiais
+    text = ''.join(char for char in text if char.isalnum() or char.isspace())
+    # Processa o texto com spaCy
+    doc = nlp(text)
+    # Lematiza e remove stop words
+    tokens = [token.lemma_ for token in doc if token.lemma_ not in stop_words and not token.is_stop]
+    return ' '.join(tokens)
+
 
 def perguntas_frequentes(request):
-    print('passei aqui')
     if request.method == 'GET':
         response_data = {}
         response_data['result'] = 'perguntas'
         response_data['message'] = 'Some error message'
-        #return JsonResponse({'perguntas': 'flavinho do pneu'})
         return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
@@ -72,10 +95,29 @@ def cadastro(request):
     else:
         return render(request, 'cadastro.html')
 
-    
+def process_and_save_messages():
+    # Recupera a lista de mensagens da sessão do usuário
+    '''
+    session = Session.objects.get(session_key=user_info.session.session_key)
+    session_data = session.get_decoded()
+    messages = session_data.get('messages', [])
+    print(messages)
+    '''
+    # Preprocessar e salvar as mensagens
+    for message in mensageList:
+        tokenized_message = preprocess(message)
+        # Verifica se a frase tokenizada já existe
+        phrase_entry, created = TokenizedPhrase.objects.get_or_create(
+            tokenized_phrase=tokenized_message,
+            defaults={'original_phrase': message, 'count': 1}
+        )
+        if not created:
+            phrase_entry.count += 1
+            phrase_entry.save()
+            
 
 def iaProcess(mensage, user_info):
-    APIKEY = "Your key"
+    APIKEY = "Sua chave"
 
     genai.configure(api_key=APIKEY)
 
@@ -89,26 +131,35 @@ def iaProcess(mensage, user_info):
                    Responda as perguntas de forma amigavel,
                    Você esta falando com {user_info["name"]},
                    A area de atução do usuario no mercado é: {user_info["area"]},
-                   responda a perguta de forma sucinta,         
+                   responda a perguta de forma sucinta, 
+                   Não exija nada da pessoa,
+                   Sempre use a pergunta anterior como base para responder as outras,
+                   Não se denomine com um nome propio
                 '''
     try:
         if not chatFoiCriado:
             chat = model.start_chat()
             chatFoiCriado = True
         response = chat.send_message(pergunta)
-        SairDoChat = model.generate_content(f'''Na seguinte mensagem : '{pergunta}', o usuário deseja encerrar a conversa?
+        SairDoChat = model.generate_content(f'''Na seguinte mensagem : '{mensage}', o usuário deseja encerrar a conversa?
                                                 (responda apenas sim ou não)''').text
-        mensagem_ofensiva = model.generate_content(f'''A seguinte mensagem : '{pergunta}', é uma mensagem ofenciva?
+        mensagem_ofensiva = model.generate_content(f'''A seguinte mensagem : '{mensage}', é uma mensagem ofensiva?
                                                 (responda apenas sim ou não)''').text
-        if SairDoChat == 'Sim':
-            if mensagem_ofensiva == 'Sim':
+        if SairDoChat == 'Sim' or SairDoChat == 'sim':
+            if mensagem_ofensiva == 'Sim' or mensagem_ofensiva == 'sim':
                 return 'Por favor, evite mensagens ofensivas'
             else:
-                return 'Espero ter ajudado.'
+                global mensageList
+                mensageList.pop()
+                print(mensageList)
+                process_and_save_messages()
+                mensageList = []
+                return 'Espero ter ajudado.' 
         try:
             resposta = response.text
             return resposta
         except Exception as e:
+                print(e)
                 semResposta = 'Não fui capaz de gerar uma resposta, por favor, faça a pergunta novamente'
                 return semResposta
     except Exception as e:
@@ -131,7 +182,7 @@ def iaProcess(mensage, user_info):
                     regexErro = ', ' + regexErro
                     listaDeViolações += regexErro
         if len(listaDeViolações) == 0:
-            return 'Sua pergunta foi bloqueada'
+            return 'Ocorreu algum erro'
         else:
             saidaErro = 'Sua pergunta foi bloqueada por vilolar o(s) seguinte(s) termo(s): ' +'"'+ listaDeViolações + '"'
         return saidaErro
@@ -141,6 +192,14 @@ def process_message(request):
     if request.method == 'GET':
         message = request.GET.get('usermessage')
         user = request.user  # Isso assume que você está usando o sistema de autenticação do Django
+        mensageList.append(message)
+        # Armazenar a mensagem na sessão do usuário
+        #if 'messages' not in request.session:
+        #request.session['messages'] = []
+        #request.session['messages'].append(message)
+        #request.session.modified = True
+
+        #print(request.session['messages'])
 
         # Exemplo de como enviar informações do usuário para iaProcess
         user_info = {
