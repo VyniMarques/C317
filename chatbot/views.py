@@ -119,9 +119,7 @@ def process_and_save_messages():
             
 
 def iaProcess(mensage, user_info):
-    APIKEY = "Your key"
-    
-
+    APIKEY = "AIzaSyD2ihwQ4ofH3br8ZMeLvf3ilKNwR3zamKI"
     genai.configure(api_key=APIKEY)
     model = genai.GenerativeModel('gemini-pro')
     chatFoiCriado = False
@@ -154,7 +152,13 @@ def iaProcess(mensage, user_info):
                                                  humano? (responda apenas sim ou não)''').text
         
         if atendenteHumano.lower() == 'sim':
+            if len(mensageList.pop()) == 0: 
+                global mensageList
+                process_and_save_messages()
+                mensageList = []
             return 'redirecionar'
+
+
         if SairDoChat == 'Sim' or SairDoChat == 'sim':
             if mensagem_ofensiva.lower() == 'sim':
                 return 'Por favor, evite mensagens ofensivas'
