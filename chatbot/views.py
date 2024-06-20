@@ -119,7 +119,7 @@ def process_and_save_messages():
             
 
 def iaProcess(mensage, user_info):
-    APIKEY = "AIzaSyD2ihwQ4ofH3br8ZMeLvf3ilKNwR3zamKI"
+    APIKEY = "Your key"
     genai.configure(api_key=APIKEY)
     model = genai.GenerativeModel('gemini-pro')
     chatFoiCriado = False
@@ -127,7 +127,7 @@ def iaProcess(mensage, user_info):
     pergunta = f'''
                    A pergunta é :{mensage},
                    Assuma que você é um chatbot da empresa IWS Intelliware Soluctions,
-                   Use como base para responder as peguntas as inormações presentes no site oficial da empresa,
+                   Use como base para responder as peguntas as inormações presentes no site oficial da empresa (https://wiki.iws.com.br/doku.php?id=intellicash),
                    Responda as perguntas de forma amigavel,
                    Você esta falando com {user_info["name"]},
                    A area de atução do usuario no mercado é: {user_info["area"]},
@@ -137,7 +137,7 @@ def iaProcess(mensage, user_info):
                    Não se denomine com um nome propio,
                    Não coloque emogis na resposta,
                    Não coloque negrito/italico nas perguntas,
-                   Respoda de forma direta
+                   Respoda de forma direta,
                 '''
     try:
         if not chatFoiCriado:
