@@ -143,15 +143,20 @@ function openModal() {
             if (messageText.trim() !== '') {
                 appendMessage('Você', messageText); // Adiciona a mensagem enviada pelo usuário
                 $.get('/chatbot/process-message', { usermessage: messageText }).done(function (data) {
-                    $('#chat-messages').append(
-                        `<div class="botmensage">
-                        <span>BOT:</span>
-                        <span class="bot-talk">${data}</span>
-                        <div class="bot-icon">
-                            <img src="/static/images/bot.png" alt="">
-                        </div>
-                        </div>`
-                    );
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                    else{
+                        $('#chat-messages').append(
+                            `<div class="botmensage">
+                            <span>BOT:</span>
+                            <span class="bot-talk">${data}</span>
+                            <div class="bot-icon">
+                                <img src="/static/images/bot.png" alt="">
+                            </div>
+                            </div>`
+                        );
+                    }   
                     chatMessages.scrollTop = chatMessages.scrollHeight;
                 });
 

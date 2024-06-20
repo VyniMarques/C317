@@ -41,7 +41,6 @@ def preprocess(text):
 
 def perguntas_frequentes(request):
     perguntas = TokenizedPhrase.objects.order_by('-count')[:5]  # Busca as 5 perguntas com os maiores contadores
-    print('flamengo')
     perguntas_list = [{'original_phrase': pergunta.original_phrase, 'count': pergunta.count} for pergunta in perguntas]
     print(perguntas_list)
     return JsonResponse({'perguntas': perguntas_list})
@@ -120,11 +119,10 @@ def process_and_save_messages():
             
 
 def iaProcess(mensage, user_info):
-    APIKEY = "Sua Chave"
+    APIKEY = "Your key"
     
 
     genai.configure(api_key=APIKEY)
-
     model = genai.GenerativeModel('gemini-pro')
     chatFoiCriado = False
     SairDoChat = ''
@@ -152,8 +150,13 @@ def iaProcess(mensage, user_info):
                                                 (responda apenas sim ou não)''').text
         mensagem_ofensiva = model.generate_content(f'''A seguinte mensagem : '{mensage}', é uma mensagem ofensiva?
                                                 (responda apenas sim ou não)''').text
+        atendenteHumano = model.generate_content(f'''Na seguinte mensagem : '{mensage}', o usuario deseja conversar com um atendente
+                                                 humano? (responda apenas sim ou não)''').text
+        
+        if atendenteHumano.lower() == 'sim':
+            return 'redirecionar'
         if SairDoChat == 'Sim' or SairDoChat == 'sim':
-            if mensagem_ofensiva == 'Sim' or mensagem_ofensiva == 'sim':
+            if mensagem_ofensiva.lower() == 'sim':
                 return 'Por favor, evite mensagens ofensivas'
             else:
                 global mensageList
@@ -192,7 +195,7 @@ def iaProcess(mensage, user_info):
         else:
             saidaErro = 'Sua pergunta foi bloqueada por vilolar o(s) seguinte(s) termo(s): ' +'"'+ listaDeViolações + '"'
         return saidaErro
-    
+
 @login_required
 def process_message(request):
     if request.method == 'GET':
@@ -212,10 +215,14 @@ def process_message(request):
             'name': user.nome,
             'email': user.email,
             'area': user.area,
+            'senha': user.senha
         }
         print(user_info)
         # Envie a mensagem para a função iaProcess com as informações do usuário
         response = iaProcess(message, user_info)
+        if response == 'redirecionar':
+            print('redirecionando')
+            return JsonResponse({'redirect': f'https://iws.mysuite2.com.br/client/login.php?h=&inf={user_info["email"]}&lf={user_info["senha"]}'})
 
         return HttpResponse(response)
     else:
