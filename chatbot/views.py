@@ -26,6 +26,7 @@ nlp = spacy.load('pt_core_news_sm')
 # Lista de stop words em português
 stop_words = list(stopwords.words('portuguese'))
 
+
 def preprocess(text):
     # Converte para minúsculas
     text = text.lower()
@@ -39,11 +40,13 @@ def preprocess(text):
 
 
 def perguntas_frequentes(request):
-    if request.method == 'GET':
-        response_data = {}
-        response_data['result'] = 'perguntas'
-        response_data['message'] = 'Some error message'
-        return HttpResponse(json.dumps(response_data), content_type="application/json")
+    perguntas = TokenizedPhrase.objects.order_by('-count')[:5]  # Busca as 5 perguntas com os maiores contadores
+    print('flamengo')
+    perguntas_list = [{'original_phrase': pergunta.original_phrase, 'count': pergunta.count} for pergunta in perguntas]
+    print(perguntas_list)
+    return JsonResponse({'perguntas': perguntas_list})
+
+
 
 
 def login(request):
@@ -117,7 +120,8 @@ def process_and_save_messages():
             
 
 def iaProcess(mensage, user_info):
-    APIKEY = "Sua chave"
+    APIKEY = "Sua Chave"
+    
 
     genai.configure(api_key=APIKEY)
 
@@ -134,7 +138,10 @@ def iaProcess(mensage, user_info):
                    responda a perguta de forma sucinta, 
                    Não exija nada da pessoa,
                    Sempre use a pergunta anterior como base para responder as outras,
-                   Não se denomine com um nome propio
+                   Não se denomine com um nome propio,
+                   Não coloque emogis na resposta,
+                   Não coloque negrito/italico nas perguntas,
+                   Respoda de forma direta
                 '''
     try:
         if not chatFoiCriado:
@@ -159,7 +166,6 @@ def iaProcess(mensage, user_info):
             resposta = response.text
             return resposta
         except Exception as e:
-                print(e)
                 semResposta = 'Não fui capaz de gerar uma resposta, por favor, faça a pergunta novamente'
                 return semResposta
     except Exception as e:

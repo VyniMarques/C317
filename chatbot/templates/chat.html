@@ -75,13 +75,10 @@
                 <!-- Estrutura do modal -->
                 <div id="modal" class="modal-bg">
                     <div class="modal-content">
-                        <span class="close-btn" onclick="closeModal()">&times;</span>
-                        <h2>Perguntas Frequentes</h2>
-                        <ul>
-                            <li><a href="#">Pergunta 1</a></li>
-                            <li><a href="#">Pergunta 2</a></li>
-                            <li><a href="#">Pergunta 3</a></li>
-                        </ul>
+                            <span class="close-btn" onclick="closeModal()">&times;</span>
+                            <h2>Perguntas Frequentes</h2>
+                            <ul id="faq-list">      
+                            </ul>
                     </div>
                 </div>
             </div>
@@ -90,6 +87,24 @@
     </div>
 
     <script>
+
+function openModal() {
+    fetch("{% url 'perguntas' %}")
+        .then(response => response.json())
+        .then(data => {
+            const faqList = document.getElementById('faq-list');
+            faqList.innerHTML = '';
+            data.perguntas.forEach(pergunta => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="#" onclick="fillInput('${pergunta.original_phrase}')">${pergunta.original_phrase}</a>`;
+                faqList.appendChild(li);
+            });
+        })
+        .catch(error => console.error('Error fetching FAQs:', error));
+    
+    document.getElementById("modal").style.display = "block";
+}
+
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -156,9 +171,6 @@
         }
         //
         // Função para abrir o modal
-        function openModal() {
-            document.getElementById('modal').style.display = 'flex';
-        }
 
         // Função para fechar o modal
         function closeModal() {
@@ -171,7 +183,10 @@
                 closeModal();
             }
         }
-
+        function fillInput(text) {
+            document.getElementById('message').value = text;
+            closeModal();
+        }
 
 
 
