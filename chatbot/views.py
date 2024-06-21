@@ -25,7 +25,10 @@ nlp = spacy.load('pt_core_news_sm')
 
 # Lista de stop words em português
 stop_words = list(stopwords.words('portuguese'))
+model = genai.GenerativeModel('gemini-pro')
+chat = None
 
+chatFoiCriado = False
 
 def preprocess(text):
     # Converte para minúsculas
@@ -121,39 +124,44 @@ def process_and_save_messages():
 def iaProcess(mensage, user_info):
     APIKEY = "Your key"
     genai.configure(api_key=APIKEY)
-    model = genai.GenerativeModel('gemini-pro')
-    chatFoiCriado = False
+    #chatFoiCriado = False
+    global mensageList 
+    global chatFoiCriado
+    global chat
     SairDoChat = ''
     pergunta = f'''
-                   A pergunta é :{mensage},
-                   Assuma que você é um chatbot da empresa IWS Intelliware Soluctions,
-                   Use como base para responder as peguntas as inormações presentes no site oficial da empresa (https://wiki.iws.com.br/doku.php?id=intellicash),
-                   Responda as perguntas de forma amigavel,
-                   Você esta falando com {user_info["name"]},
-                   A area de atução do usuario no mercado é: {user_info["area"]},
-                   responda a perguta de forma sucinta, 
-                   Não exija nada da pessoa,
-                   Sempre use a pergunta anterior como base para responder as outras,
-                   Não se denomine com um nome propio,
-                   Não coloque emogis na resposta,
-                   Não coloque negrito/italico nas perguntas,
-                   Respoda de forma direta,
+                    Instruções para o Chatbot da IWS Intelliware Solutions:
+                    - A Pergunta é: {mensage}
+                    - Identidade do Chatbot: Assuma que você é um chatbot da empresa IWS Intelliware Solutions.
+                    - Fontes de Informação: Use as informações presentes no site oficial da empresa: IWS Intelliware Solutions(https://wiki.iws.com.br/doku.php?id=intellicash).
+                    - Não coloque na resposta qualquer reredicionamento a antendimento
+                    Estilo de Resposta:
+                    - Responda de forma amigável e sucinta.
+                    - Utilize a pergunta anterior como base para responder às próximas perguntas.
+                    - Não exija nada do usuário.
+                    - Responda de forma direta.
+                    - Não utilize emojis, negrito ou itálico.
+                    - Não se identifique com um nome próprio.
+                    - Evite usar titulos marcados nos topicos
+                    Informações do Usuário:
+                    - Nome: {user_info["name"]}
+                    - Área de Atuação no Mercado: {user_info["area"]}
                 '''
     try:
         if not chatFoiCriado:
             chat = model.start_chat()
+            #global chatFoiCriado 
             chatFoiCriado = True
         response = chat.send_message(pergunta)
         SairDoChat = model.generate_content(f'''Na seguinte mensagem : '{mensage}', o usuário deseja encerrar a conversa?
                                                 (responda apenas sim ou não)''').text
         mensagem_ofensiva = model.generate_content(f'''A seguinte mensagem : '{mensage}', é uma mensagem ofensiva?
                                                 (responda apenas sim ou não)''').text
-        atendenteHumano = model.generate_content(f'''Na seguinte mensagem : '{mensage}', o usuario deseja conversar com um atendente
-                                                 humano? (responda apenas sim ou não)''').text
+        atendenteHumano = model.generate_content(f'''Na seguinte mensagem : '{mensage}', o usuario deseja conversar com um atendente da humano? (responda apenas sim ou não)''').text
         
         if atendenteHumano.lower() == 'sim':
             if len(mensageList.pop()) == 0: 
-                global mensageList
+                #global mensageList
                 process_and_save_messages()
                 mensageList = []
             return 'redirecionar'
@@ -163,11 +171,12 @@ def iaProcess(mensage, user_info):
             if mensagem_ofensiva.lower() == 'sim':
                 return 'Por favor, evite mensagens ofensivas'
             else:
-                global mensageList
+                
                 mensageList.pop()
                 print(mensageList)
                 process_and_save_messages()
                 mensageList = []
+                chatFoiCriado = False
                 return 'Espero ter ajudado.' 
         try:
             resposta = response.text

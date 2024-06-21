@@ -144,6 +144,15 @@ function openModal() {
                 appendMessage('Você', messageText); // Adiciona a mensagem enviada pelo usuário
                 $.get('/chatbot/process-message', { usermessage: messageText }).done(function (data) {
                     if (data.redirect) {
+                        $('#chat-messages').append(
+                            `<div class="botmensage">
+                            <span>BOT:</span>
+                            <span class="bot-talk">Irei redirecionalo a um atendente</span>
+                            <div class="bot-icon">
+                                <img src="/static/images/bot.png" alt="">
+                            </div>
+                            </div>`
+                        );
                         window.location.href = data.redirect;
                     }
                     else{
